@@ -15,4 +15,13 @@ public class Mapper : IMapper {
         Name = game.Name,
         Price = game.Price
     };
+
+    public PurchaseResponse Map(Purchase purchase) => new() {
+        Id = purchase.Id,
+        UserId = purchase.UserId,
+        UserName = purchase.UserName,
+        GameIds = purchase.GameIds,
+        Total = purchase.Total,
+        CreatedAtUtc = purchase.CreatedAtUtc
+    };
 }

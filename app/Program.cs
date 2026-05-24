@@ -26,6 +26,8 @@ builder.Services.AddDbContext<PlatformDbContext>(options => {
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IPurchaseService, PurchaseService>();
+builder.Services.AddScoped<IReceiptService, ReceiptService>();
 builder.Services.AddScoped<IMapper, Mapper>();
 
 var app = builder.Build();
@@ -47,6 +49,7 @@ if (app.Environment.IsDevelopment()) {
 var api = app.MapGroup("/api");
 api.MapUsersEndpoints();
 api.MapGamesEndpoints();
+api.MapPurchasesEndpoints();
 
 app.MapGet("/", () => Results.Ok(new {
     message = "Game Platform API работает."
