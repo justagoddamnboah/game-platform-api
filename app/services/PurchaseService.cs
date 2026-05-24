@@ -20,7 +20,7 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
 
     public async Task<Purchase> CreateAsync(CreatePurchaseRequest request) {
         if (request.GameIds.Count == 0) {
-            throw new ArgumentException("Список товаров в покупке не должен быть пустым.");
+            throw new ArgumentException("Список игр в покупке не должен быть пустым.");
         }
 
         var user = await db.Users.FirstOrDefaultAsync(x => x.Id == request.UserId);
@@ -28,23 +28,25 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
             throw new InvalidOperationException("Пользователь не найден.");
         }
 
-        var groupedGameIds = request.GameIds
-            .GroupBy(x => x)
-            .ToDictionary(g => g.Key, g => g.Count());
+        var uniqueGameIds = request.GameIds.Distinct().ToList();
 
-        var products = await db.Games
-            .Where(x => groupedGameIds.Keys.Contains(x.Id))
-            .ToListAsync();
-
-        foreach (var pair in groupedGameIds) {
-            var game = products.FirstOrDefault(x => x.Id == pair.Key);
-            if (game is null) {
-                throw new InvalidOperationException($"Товар {pair.Key} не найден.");
-            }
+        if (uniqueGameIds.Count == 0) {
+            throw new ArgumentException("Список игр в покупке не должен быть пустым.");
         }
 
-        var prices = products.ToDictionary(x => x.Id, x => x.Price);
-        var total = request.GameIds.Sum(productId => prices[productId]);
+        var games = await db.Games
+            .Where(x => uniqueGameIds.Contains(x.Id))
+            .ToListAsync();
+
+        if (games.Count != uniqueGameIds.Count) {
+            var foundGameIds = games.Select(g => g.Id).ToHashSet();
+            var missingGameIds = uniqueGameIds.Where(id => !foundGameIds.Contains(id));
+            throw new InvalidOperationException($"Следующие игры не найдены: {string.Join(", ", missingGameIds)}");
+        }
+        
+        var total = games.Sum(game => game.Price);
+
+        var gameNames = games.Select(g => g.Name).ToArray();
 
         var purchase = new Purchase {
             Id = Guid.NewGuid(),
@@ -52,7 +54,8 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
             UserName = user.ProfileName,
             CreatedAtUtc = DateTime.UtcNow,
             Total = total,
-            GameIds = request.GameIds.ToArray()
+            GameIds = uniqueGameIds.ToArray(),
+            GameNames = gameNames
         };
 
         db.Purchases.Add(purchase);
@@ -73,31 +76,34 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
 
         var newCustomer = await db.Users.FirstOrDefaultAsync(x => x.Id == request.UserId);
         if (newCustomer is null) {
-            throw new InvalidOperationException("Клиент не найден.");
+            throw new InvalidOperationException("Пользователь не найден.");
         }
 
-        var groupedGameIds = request.GameIds
-            .GroupBy(x => x)
-            .ToDictionary(g => g.Key, g => g.Count());
+        var uniqueGameIds = request.GameIds.Distinct().ToList();
+
+        if (uniqueGameIds.Count == 0) {
+            throw new ArgumentException("Список игр в покупке не должен быть пустым.");
+        }
 
         var games = await db.Games
-            .Where(x => groupedGameIds.Keys.Contains(x.Id))
+            .Where(x => uniqueGameIds.Contains(x.Id))
             .ToListAsync();
 
-        foreach (var pair in groupedGameIds) {
-            var game = games.FirstOrDefault(x => x.Id == pair.Key);
-            if (game is null) {
-                throw new InvalidOperationException($"Игра {pair.Key} не найдена.");
-            }
+        if (games.Count != uniqueGameIds.Count) {
+            var foundGameIds = games.Select(g => g.Id).ToHashSet();
+            var missingGameIds = uniqueGameIds.Where(id => !foundGameIds.Contains(id));
+            throw new InvalidOperationException($"Следующие игры не найдены: {string.Join(", ", missingGameIds)}");
         }
+        
+        var total = games.Sum(game => game.Price);
 
-        var prices = games.ToDictionary(x => x.Id, x => x.Price);
-        var total = request.GameIds.Sum(productId => prices[productId]);
+        var gameNames = games.Select(g => g.Name).ToArray();
 
         purchase.UserId = newCustomer.Id;
         purchase.UserName = newCustomer.ProfileName;
         purchase.GameIds = request.GameIds.ToArray();
         purchase.Total = total;
+        purchase.GameNames = gameNames;
 
         await db.SaveChangesAsync();
         return purchase;

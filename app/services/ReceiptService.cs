@@ -12,11 +12,14 @@ public class ReceiptService : IReceiptService {
         builder.AppendLine(new string('-', 40));
         builder.AppendLine($"Покупка: {purchase.Id}");
         builder.AppendLine($"Дата (UTC): {purchase.CreatedAtUtc:yyyy-MM-dd HH:mm:ss}");
-        builder.AppendLine($"Клиент: {purchase.UserId}");
+        builder.AppendLine("Клиент:");
+        builder.AppendLine($"- {purchase.UserName} ({purchase.UserId})");
         builder.AppendLine(new string('-', 40));
         builder.AppendLine("Игры (id):");
-        foreach (var gameId in purchase.GameIds) {
-            builder.AppendLine($"- {gameId}");
+        for (int i = 0; i < purchase.GameIds.Length; i++) {
+            builder.AppendLine(
+                $"{purchase.GameIds[i]} - {purchase.GameNames[i]}"
+            );
         }
 
         builder.AppendLine(new string('-', 40));

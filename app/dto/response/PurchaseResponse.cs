@@ -5,6 +5,7 @@ public record PurchaseResponse {
     public Guid UserId { get; init; }
     public string UserName {  get; init; } = string.Empty;
     public Guid[] GameIds { get; init; } = [];
+    public string[] GameNames { get; set; } = [];
     public decimal Total { get; init; }
     public DateTime CreatedAtUtc { get; init; }
 }

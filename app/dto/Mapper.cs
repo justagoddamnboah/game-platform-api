@@ -21,6 +21,7 @@ public class Mapper : IMapper {
         UserId = purchase.UserId,
         UserName = purchase.UserName,
         GameIds = purchase.GameIds,
+        GameNames = purchase.GameNames,
         Total = purchase.Total,
         CreatedAtUtc = purchase.CreatedAtUtc
     };
