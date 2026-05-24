@@ -30,45 +30,6 @@ public static class UsersEndpoints {
             .Produces<UserResponse>(StatusCodes.Status200OK)
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
         
-        group.MapGet("/{userId:guid}/library",
-                async (Guid userId, IUserService users, IPurchaseService purchases, IMapper mapper) => {
-                var user = await users.GetByIdAsync(userId);
-                var library = await purchases.GetAllPurchasesByUserIdAsync(userId);
-                return user is null
-                    ? Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." })
-                    : Results.Ok(mapper.MapLibrary(user, library));
-            })
-            .WithSummary("Получить библиотеку пользователя")
-            .WithDescription("Возвращает игры указанного пользователя.")
-            .Produces<UserLibraryResponse>(StatusCodes.Status200OK)
-            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
-
-        group.MapGet("/{userId:guid}/reviews",
-                async (Guid userId, IReviewService reviews, IUserService users, IMapper mapper) => {
-                    var review = await reviews.GetAllReviewsByUserIdAsync(userId);
-                    var user = await users.GetByIdAsync(userId);
-                    return user is null
-                        ? Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." })
-                        : Results.Ok(mapper.MapReviews(review, user, null));
-                })
-            .WithSummary("Получить отзывы, оставленные пользователем")
-            .WithDescription("Возвращает отзывы, оставленные пользователем.")
-            .Produces<UserReviewResponse>(StatusCodes.Status200OK)
-            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
-
-        group.MapGet("/{userId:guid}/wishlist",
-                async (Guid userId, IUserService users, IWishlistService wishlist, IMapper mapper) => {
-                    var user = await users.GetByIdAsync(userId);
-                    var wish = await wishlist.GetAllByUserIdAsync(userId);
-                    return user is null
-                        ? Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." })
-                        : Results.Ok(mapper.MapWishlist(user, wish));
-                })
-            .WithSummary("Получить список желаемых игр пользователя")
-            .WithDescription("Возвращает список желаемых игр пользователя.")
-            .Produces<UserWishlistResponse>(StatusCodes.Status200OK)
-            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
-        
         
         
         group.MapPost("/", async (CreateUserRequest body, IUserService users, IMapper mapper) => {

@@ -5,9 +5,9 @@ public class User {
     
     public string Email { get; set; } = string.Empty;
     
-    public Guid[] Library { get; set; }
+    // public Guid[] Library { get; set; }
     
-    public Guid[] Wishlist { get; set; }
+    // public Guid[] Wishlist { get; set; }
     
-    public Guid[] Reviews { get; set; }
+    // public Guid[] Reviews { get; set; }
 }

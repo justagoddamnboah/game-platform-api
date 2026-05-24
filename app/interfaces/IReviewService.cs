@@ -3,6 +3,6 @@
 namespace game_platform.net.interfaces;
 
 public interface IReviewService {
-    Task<Review> GetAllReviewsByUserIdAsync(Guid userId);
-    Task<Game> GetAllGamesByUserIdAsync(Guid userId);
+    Task<Review> GetReviewsByUserIdAsync(Guid userId);
+    Task<Game> GetGamesByUserIdAsync(Guid userId);
 }

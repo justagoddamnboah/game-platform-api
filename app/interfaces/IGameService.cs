@@ -3,4 +3,5 @@
 namespace game_platform.net.interfaces;
 
 public interface IGameService {
+    
 }
