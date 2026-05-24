@@ -9,10 +9,8 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new()
-    {
+builder.Services.AddSwaggerGen(options => {
+    options.SwaggerDoc("v1", new() {
         Title = "Game Platform API",
         Version = "v1",
         Description = "Демонстрационный API игровой платформы."
@@ -27,6 +25,7 @@ builder.Services.AddDbContext<PlatformDbContext>(options => {
 });
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IMapper, Mapper>();
 
 var app = builder.Build();
@@ -47,6 +46,7 @@ if (app.Environment.IsDevelopment()) {
 
 var api = app.MapGroup("/api");
 api.MapUsersEndpoints();
+api.MapGamesEndpoints();
 
 app.MapGet("/", () => Results.Ok(new {
     message = "Game Platform API работает."

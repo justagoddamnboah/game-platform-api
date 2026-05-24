@@ -9,4 +9,10 @@ public class Mapper : IMapper {
         ProfileName = user.ProfileName,
         Email = user.Email
     };
+    
+    public GameResponse Map(Game game) => new() {
+        Id = game.Id,
+        Name = game.Name,
+        Price = game.Price
+    };
 }

@@ -5,4 +5,5 @@ namespace game_platform.net.dto;
 
 public interface IMapper {
     UserResponse Map(User user);
+    GameResponse Map(Game game);
 }
