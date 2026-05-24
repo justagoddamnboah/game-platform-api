@@ -5,7 +5,7 @@ public class Review {
     
     public Guid GameId { get; set; }
     
-    public Guid CustomerId { get; set; }
+    public Guid UserId { get; set; }
     
     public int Rating { get; set; }
     

@@ -7,6 +7,8 @@ public class Game {
 
     public decimal Price { get; set; }
     
+    public int AgeRestriction { get; set; }
+    
     public int Sold { get; set; }
     
     public Review[] Reviews { get; set; }

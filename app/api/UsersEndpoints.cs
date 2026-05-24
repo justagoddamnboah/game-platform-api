@@ -1,0 +1,123 @@
+using game_platform.net.dto;
+using game_platform.net.dto.request;
+using game_platform.net.dto.response;
+using game_platform.net.interfaces;
+
+namespace game_platform.net.api;
+
+public static class UsersEndpoints {
+    public static RouteGroupBuilder MapUsersEndpoints(this RouteGroupBuilder api) {
+        var group = api.MapGroup("/users").WithTags("Users");
+
+        group.MapGet("/", async (IUserService users, IMapper mapper) => {
+                var result = await users.GetAllAsync();
+                return Results.Ok(result.Select(mapper.Map));
+            })
+            .WithSummary("Получить список пользователей")
+            .WithDescription("Возвращает всех зарегистрированных пользователей и количество купленных ими игр.")
+            .Produces<IEnumerable<UserResponse>>(StatusCodes.Status200OK);
+
+        
+        
+        group.MapGet("/{userId:guid}",
+                async (Guid userId, IUserService users, IMapper mapper) => {
+                    var user = await users.GetByIdAsync(userId);
+                    return user is null
+                        ? Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." })
+                        : Results.Ok(mapper.Map(user));
+                })
+            .WithSummary("Получить пользователя по идентификатору")
+            .Produces<UserResponse>(StatusCodes.Status200OK)
+            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
+        
+        group.MapGet("/{userId:guid}/library",
+                async (Guid userId, IUserService users, IPurchaseService purchases, IMapper mapper) => {
+                var user = await users.GetByIdAsync(userId);
+                var library = await purchases.GetAllPurchasesByUserIdAsync(userId);
+                return user is null
+                    ? Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." })
+                    : Results.Ok(mapper.MapLibrary(user, library));
+            })
+            .WithSummary("Получить библиотеку пользователя")
+            .WithDescription("Возвращает игры указанного пользователя.")
+            .Produces<UserLibraryResponse>(StatusCodes.Status200OK)
+            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
+
+        group.MapGet("/{userId:guid}/reviews",
+                async (Guid userId, IReviewService reviews, IUserService users, IMapper mapper) => {
+                    var review = await reviews.GetAllReviewsByUserIdAsync(userId);
+                    var user = await users.GetByIdAsync(userId);
+                    return user is null
+                        ? Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." })
+                        : Results.Ok(mapper.MapReviews(review, user, null));
+                })
+            .WithSummary("Получить отзывы, оставленные пользователем")
+            .WithDescription("Возвращает отзывы, оставленные пользователем.")
+            .Produces<UserReviewResponse>(StatusCodes.Status200OK)
+            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
+
+        group.MapGet("/{userId:guid}/wishlist",
+                async (Guid userId, IUserService users, IWishlistService wishlist, IMapper mapper) => {
+                    var user = await users.GetByIdAsync(userId);
+                    var wish = await wishlist.GetAllByUserIdAsync(userId);
+                    return user is null
+                        ? Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." })
+                        : Results.Ok(mapper.MapWishlist(user, wish));
+                })
+            .WithSummary("Получить список желаемых игр пользователя")
+            .WithDescription("Возвращает список желаемых игр пользователя.")
+            .Produces<UserWishlistResponse>(StatusCodes.Status200OK)
+            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
+        
+        
+        
+        group.MapPost("/", async (CreateUserRequest body, IUserService users, IMapper mapper) => {
+                try {
+                    var created = await users.AddAsync(body);
+                    return Results.Created($"/api/users/{created.Id}", mapper.Map(created));
+                }
+                catch (Exception ex) when (ex is ArgumentException or InvalidOperationException) {
+                    return Results.BadRequest(new ErrorResponse { Message = ex.Message });
+                }
+            })
+            .WithSummary("Добавить пользователя")
+            .Produces<UserResponse>(StatusCodes.Status201Created)
+            .Produces<ErrorResponse>(StatusCodes.Status400BadRequest);
+
+        group.MapPut("/{userId:guid}",
+                async (Guid userId, UpdateUserRequest body, IUserService users, IMapper mapper) => {
+                try {
+                    var updated = await users.UpdateAsync(userId, body);
+                    return updated is null
+                        ? Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." })
+                        : Results.Ok(mapper.Map(updated));
+                }
+                catch (ArgumentException ex) {
+                    return Results.BadRequest(new ErrorResponse { Message = ex.Message });
+                }
+            })
+            .WithSummary("Изменить пользователя")
+            .Produces<UserResponse>(StatusCodes.Status200OK)
+            .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
+
+        group.MapDelete("/{userId:guid}",
+                async (Guid userId, IUserService users) => {
+                try {
+                    var deleted = await users.DeleteAsync(userId);
+                    return deleted
+                        ? Results.NoContent()
+                        : Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." });
+                }
+                catch (InvalidOperationException ex) {
+                    return Results.BadRequest(new ErrorResponse { Message = ex.Message });
+                }
+            })
+            .WithSummary("Удалить пользователя")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
+
+        return api;
+    }
+}
