@@ -28,6 +28,17 @@ public class UserService(PlatformDbContext db) : IUserService {
             .ToListAsync();
         return games;
     }
+    
+    public async Task<IReadOnlyList<Review>> SeeUsersReviews(Guid userId) {
+        var user = await db.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == userId);
+        var reviews = await db.Reviews
+            .AsNoTracking()
+            .Where(r => user.Reviews.Contains(r.Id))
+            .ToListAsync();
+        return reviews;
+    }
 
     public async Task<User> AddAsync(CreateUserRequest request) {
         ValidateUserFields(request.ProfileName, request.Email, request.Age);

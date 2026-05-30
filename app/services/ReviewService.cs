@@ -42,6 +42,7 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
         };
         db.Reviews.Add(entity);
         game.Reviews = game.Reviews.Append(entity.Id).ToArray();
+        user.Reviews = user.Reviews.Append(entity.Id).ToArray();
         await db.SaveChangesAsync();
         return entity;
     }
@@ -66,6 +67,7 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
         entity.Commentary = request.Commentary;
         entity.CreatedAtUtc = DateTime.UtcNow;
         game.Reviews = game.Reviews.Append(entity.Id).ToArray();
+        user.Reviews = user.Reviews.Append(entity.Id).ToArray();
         await db.SaveChangesAsync();
         return entity;
     }
@@ -73,11 +75,13 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
     public async Task<bool> DeleteAsync(Guid id) {
         var entity = await db.Reviews.FirstOrDefaultAsync(x => x.Id == id);
         var game = await db.Games.FirstOrDefaultAsync(x => x.Id == entity.GameId);
+        var user = await db.Users.FirstOrDefaultAsync(x => x.Id == entity.UserId);
         if (entity is null) {
             return false;
         }
         db.Reviews.Remove(entity);
         game.Reviews = game.Reviews.Where(reviewId => !entity.Id.Equals(reviewId)).ToArray();
+        user.Reviews = user.Reviews.Where(reviewId => !entity.Id.Equals(reviewId)).ToArray();
         await db.SaveChangesAsync();
         return true;
     }

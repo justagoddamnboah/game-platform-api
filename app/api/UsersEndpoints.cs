@@ -41,10 +41,25 @@ public static class UsersEndpoints {
                         ? Results.NotFound(new ErrorResponse {Message = "Библиотека пуста."})
                         : Results.Ok(mapper.MapLibrary(user));
                 })
-            .WithSummary("Посмотреть библиотеку игр пользователя.")
+            .WithSummary("Посмотреть библиотеку игр пользователя")
             .Produces<UserResponse>(StatusCodes.Status200OK)
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
         
+        group.MapGet("/{userId:guid}/reviews",
+                async (Guid userId, IUserService users, IMapper mapper) => {
+                    var user = await users.GetByIdAsync(userId);
+                    if (user == null) {
+                        return Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." });
+                    }
+                    var reviews = await users.SeeUsersReviews(userId);
+                    var reviewResponses = reviews.Select(review => mapper.Map(review)).ToList();
+                    return reviews.Count == 0
+                        ? Results.NotFound(new ErrorResponse {Message = "Отзывов нет."})
+                        : Results.Ok(reviewResponses);
+                })
+            .WithSummary("Посмотреть все отзывы пользователя")
+            .Produces<ReviewResponse>(StatusCodes.Status200OK)
+            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
         
         
         group.MapPost("/", async (CreateUserRequest body, IUserService users, IMapper mapper) => {
