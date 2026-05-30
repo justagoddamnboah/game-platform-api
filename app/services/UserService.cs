@@ -18,6 +18,17 @@ public class UserService(PlatformDbContext db) : IUserService {
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
 
+    public async Task<IReadOnlyList<Game>> SeeLibrary(Guid userId) {
+        var user = await db.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == userId);
+        var games = await db.Games
+            .AsNoTracking()
+            .Where(g => user.Library.Contains(g.Id))
+            .ToListAsync();
+        return games;
+    }
+
     public async Task<User> AddAsync(CreateUserRequest request) {
         ValidateUserFields(request.ProfileName, request.Email, request.Age);
         var id = request.Id ?? Guid.NewGuid();

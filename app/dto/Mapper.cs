@@ -11,6 +11,12 @@ public class Mapper : IMapper {
         Age = user.Age,
         GamesCount = user.Library.Length
     };
+
+    public UserLibraryResponse MapLibrary(User user) => new() {
+        UserId = user.Id,
+        GamesCount = user.Library.Length,
+        GameIds = user.Library
+    };
     
     public GameResponse Map(Game game) => new() {
         Id = game.Id,

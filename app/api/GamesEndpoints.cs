@@ -24,7 +24,7 @@ public static class GamesEndpoints {
                     ? Results.NotFound(new ErrorResponse { Message = "Игра не найдена." })
                     : Results.Ok(mapper.Map(game));
             })
-            .WithSummary("Получить товар по идентификатору")
+            .WithSummary("Получить игру по идентификатору")
             .Produces<GameResponse>(StatusCodes.Status200OK)
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
 

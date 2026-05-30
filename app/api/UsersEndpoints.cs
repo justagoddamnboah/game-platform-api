@@ -23,10 +23,25 @@ public static class UsersEndpoints {
                 async (Guid userId, IUserService users, IMapper mapper) => {
                     var user = await users.GetByIdAsync(userId);
                     return user is null
-                        ? Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." })
+                        ? Results.NotFound(new ErrorResponse { Message = "Пользователь не найден."})
                         : Results.Ok(mapper.Map(user));
                 })
             .WithSummary("Получить пользователя по идентификатору")
+            .Produces<UserResponse>(StatusCodes.Status200OK)
+            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
+        
+        group.MapGet("/{userId:guid}/library",
+                async (Guid userId, IUserService users, IMapper mapper) => {
+                    var user = await users.GetByIdAsync(userId);
+                    if (user is null) {
+                        Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." });
+                    }
+                    var games = await users.SeeLibrary(userId);
+                    return games.Count == 0
+                        ? Results.NotFound(new ErrorResponse {Message = "Библиотека пуста."})
+                        : Results.Ok(mapper.MapLibrary(user));
+                })
+            .WithSummary("Посмотреть библиотеку игр пользователя.")
             .Produces<UserResponse>(StatusCodes.Status200OK)
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
         
