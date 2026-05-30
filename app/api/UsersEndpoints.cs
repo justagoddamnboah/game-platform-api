@@ -33,8 +33,8 @@ public static class UsersEndpoints {
         group.MapGet("/{userId:guid}/library",
                 async (Guid userId, IUserService users, IMapper mapper) => {
                     var user = await users.GetByIdAsync(userId);
-                    if (user is null) {
-                        Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." });
+                    if (user == null) {
+                        return Results.NotFound(new ErrorResponse { Message = "Пользователь не найден." });
                     }
                     var games = await users.SeeLibrary(userId);
                     return games.Count == 0
