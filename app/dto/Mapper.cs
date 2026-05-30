@@ -8,13 +8,15 @@ public class Mapper : IMapper {
         Id = user.Id,
         ProfileName = user.ProfileName,
         Email = user.Email,
+        Age = user.Age,
         GamesCount = user.Library.Length
     };
     
     public GameResponse Map(Game game) => new() {
         Id = game.Id,
         Name = game.Name,
-        Price = game.Price
+        Price = game.Price,
+        AgeRestriction = game.AgeRestriction,
     };
 
     public PurchaseResponse Map(Purchase purchase) => new() {

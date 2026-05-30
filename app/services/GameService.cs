@@ -19,7 +19,7 @@ public class GameService(PlatformDbContext db) : IGameService {
             .FirstOrDefaultAsync(x => x.Id == id);
 
     public async Task<Game> AddAsync(CreateGameRequest request) {
-        ValidateProductFields(request.Name, request.Price);
+        ValidateProductFields(request.Name, request.Price, request.AgeRestriction);
 
         var id = request.Id ?? Guid.NewGuid();
         if (await db.Games.AnyAsync(x => x.Id == id)) {
@@ -37,9 +37,8 @@ public class GameService(PlatformDbContext db) : IGameService {
         return entity;
     }
 
-    public async Task<Game?> UpdateAsync(Guid id, UpdateGameRequest request)
-    {
-        ValidateProductFields(request.Name, request.Price);
+    public async Task<Game?> UpdateAsync(Guid id, UpdateGameRequest request) {
+        ValidateProductFields(request.Name, request.Price, request.Age);
 
         var entity = await db.Games.FirstOrDefaultAsync(x => x.Id == id);
         if (entity is null) {
@@ -63,13 +62,15 @@ public class GameService(PlatformDbContext db) : IGameService {
         return true;
     }
 
-    private static void ValidateProductFields(string name, decimal price) {
+    private static void ValidateProductFields(string name, decimal price, int ageRestriction) {
         if (string.IsNullOrWhiteSpace(name)) {
             throw new ArgumentException("Название игры не должно быть пустым.");
         }
-
         if (price < 0) {
             throw new ArgumentException("Цена не может быть отрицательной.");
+        }
+        if (ageRestriction < 0) {
+            throw new ArgumentException("Возрастное ограничение не может быть отрицательным.");
         }
     }
 }

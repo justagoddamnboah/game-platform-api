@@ -19,33 +19,28 @@ public class UserService(PlatformDbContext db) : IUserService {
             .FirstOrDefaultAsync(x => x.Id == id);
 
     public async Task<User> AddAsync(CreateUserRequest request) {
-        ValidateUserFields(request.ProfileName, request.Email);
-
+        ValidateUserFields(request.ProfileName, request.Email, request.Age);
         var id = request.Id ?? Guid.NewGuid();
         if (await db.Users.AnyAsync(x => x.Id == id)) {
             throw new InvalidOperationException($"Пользователь с идентификатором {id} уже существует.");
         }
-
         var entity = new User {
             Id = id,
             ProfileName = request.ProfileName.Trim(),
             Email = request.Email.Trim(),
             Library = []
         };
-
         db.Users.Add(entity);
         await db.SaveChangesAsync();
         return entity;
     }
 
     public async Task<User?> UpdateAsync(Guid id, UpdateUserRequest request) {
-        ValidateUserFields(request.ProfileName, request.Email);
-
+        ValidateUserFields(request.ProfileName, request.Email, request.Age);
         var entity = await db.Users.FirstOrDefaultAsync(x => x.Id == id);
         if (entity is null) {
             return null;
         }
-
         entity.ProfileName = request.ProfileName.Trim();
         entity.Email = request.Email.Trim();
         await db.SaveChangesAsync();
@@ -57,24 +52,24 @@ public class UserService(PlatformDbContext db) : IUserService {
         if (entity is null) {
             return false;
         }
-
         var hasPurchases = await db.Purchases.AnyAsync(p => p.UserId == id);
         if (hasPurchases) {
             throw new InvalidOperationException("Нельзя удалить пользователя: есть связанные покупки.");
         }
-
         db.Users.Remove(entity);
         await db.SaveChangesAsync();
         return true;
     }
 
-    private static void ValidateUserFields(string profileName, string email) {
+    private static void ValidateUserFields(string profileName, string email, int age) {
         if (string.IsNullOrWhiteSpace(profileName)) {
             throw new ArgumentException("Имя пользователя не должно быть пустым.");
         }
-
         if (string.IsNullOrWhiteSpace(email)) {
             throw new ArgumentException("Email не должен быть пустым.");
+        }
+        if (age < 0) {
+            throw new ArgumentException("Возраст не может быть отрицательным.");
         }
     }
 }
