@@ -7,5 +7,6 @@ public interface IMapper {
     UserResponse Map(User user);
     UserLibraryResponse MapLibrary(User user);
     GameResponse Map(Game game);
+    ReviewResponse Map(Review review);
     PurchaseResponse Map(Purchase purchase);
 }

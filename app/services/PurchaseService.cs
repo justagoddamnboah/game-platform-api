@@ -99,8 +99,7 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
                 throw new ArgumentException("Возрастное ограничение игры не дает права на совершение покупки.");
             }
         }
-        var currentLibrary = newCustomer.Library;
-        newCustomer.Library = currentLibrary.Concat(uniqueGameIds).Distinct().ToArray();
+        newCustomer.Library = newCustomer.Library.Concat(uniqueGameIds).Distinct().ToArray();
         await db.SaveChangesAsync();
         return purchase;
     }
@@ -111,8 +110,7 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
             return false;
         }
         var formerUser = await db.Users.FirstOrDefaultAsync(x => x.Id == purchase.UserId);
-        var currentLibrary = formerUser.Library;
-        formerUser.Library = currentLibrary.Where(gameId => !purchase.GameIds.Contains(gameId)).ToArray();
+        formerUser.Library = formerUser.Library.Where(gameId => !purchase.GameIds.Contains(gameId)).ToArray();
         db.Purchases.Remove(purchase);
         await db.SaveChangesAsync();
         return true;

@@ -38,8 +38,10 @@ public class UserService(PlatformDbContext db) : IUserService {
         var entity = new User {
             Id = id,
             ProfileName = request.ProfileName.Trim(),
+            Age = request.Age,
             Email = request.Email.Trim(),
-            Library = []
+            Library = [],
+            Reviews = []
         };
         db.Users.Add(entity);
         await db.SaveChangesAsync();
@@ -54,6 +56,7 @@ public class UserService(PlatformDbContext db) : IUserService {
         }
         entity.ProfileName = request.ProfileName.Trim();
         entity.Email = request.Email.Trim();
+        entity.Age = request.Age;
         await db.SaveChangesAsync();
         return entity;
     }

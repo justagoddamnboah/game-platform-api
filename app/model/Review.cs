@@ -6,4 +6,5 @@ public class Review {
     public Guid UserId { get; set; }
     public int Rating { get; set; }
     public string? Commentary { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
 }

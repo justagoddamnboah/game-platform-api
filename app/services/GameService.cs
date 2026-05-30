@@ -20,33 +20,31 @@ public class GameService(PlatformDbContext db) : IGameService {
 
     public async Task<Game> AddAsync(CreateGameRequest request) {
         ValidateProductFields(request.Name, request.Price, request.AgeRestriction);
-
         var id = request.Id ?? Guid.NewGuid();
         if (await db.Games.AnyAsync(x => x.Id == id)) {
             throw new InvalidOperationException($"Игра с идентификатором {id} уже существует.");
         }
-
         var entity = new Game {
             Id = id,
             Name = request.Name.Trim(),
-            Price = request.Price
+            Price = request.Price,
+            AgeRestriction = request.AgeRestriction,
+            Reviews = []
         };
-
         db.Games.Add(entity);
         await db.SaveChangesAsync();
         return entity;
     }
 
     public async Task<Game?> UpdateAsync(Guid id, UpdateGameRequest request) {
-        ValidateProductFields(request.Name, request.Price, request.Age);
-
+        ValidateProductFields(request.Name, request.Price, request.AgeRestriction);
         var entity = await db.Games.FirstOrDefaultAsync(x => x.Id == id);
         if (entity is null) {
             return null;
         }
-
         entity.Name = request.Name.Trim();
         entity.Price = request.Price;
+        entity.AgeRestriction = request.AgeRestriction;
         await db.SaveChangesAsync();
         return entity;
     }
@@ -56,7 +54,6 @@ public class GameService(PlatformDbContext db) : IGameService {
         if (entity is null) {
             return false;
         }
-
         db.Games.Remove(entity);
         await db.SaveChangesAsync();
         return true;
