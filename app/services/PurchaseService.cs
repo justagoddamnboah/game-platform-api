@@ -46,21 +46,24 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
         
         var total = games.Sum(game => game.Price);
 
-        var gameNames = games.Select(g => g.Name).ToArray();
-
         var purchase = new Purchase {
             Id = Guid.NewGuid(),
             UserId = user.Id,
-            UserName = user.ProfileName,
             CreatedAtUtc = DateTime.UtcNow,
             Total = total,
-            GameIds = uniqueGameIds.ToArray(),
-            GameNames = gameNames
+            GameIds = uniqueGameIds.ToArray()
         };
+        
+        var alreadyBought = user.Library.Where(gameId => purchase.GameIds.Contains(gameId)).ToArray();
 
+        if (alreadyBought.Length > 0) {
+            throw new ArgumentException("Игры с такими ID уже есть в библиотеке у данного пользователя.");
+        }
+        
+        var currentLibrary = user.Library;
         db.Purchases.Add(purchase);
+        user.Library = currentLibrary.Concat(uniqueGameIds).Distinct().ToArray();
         await db.SaveChangesAsync();
-
         return purchase;
     }
 
@@ -96,15 +99,13 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
         }
         
         var total = games.Sum(game => game.Price);
-
-        var gameNames = games.Select(g => g.Name).ToArray();
-
         purchase.UserId = newCustomer.Id;
-        purchase.UserName = newCustomer.ProfileName;
         purchase.GameIds = request.GameIds.ToArray();
         purchase.Total = total;
-        purchase.GameNames = gameNames;
 
+        var currentLibrary = newCustomer.Library;
+        newCustomer.Library = currentLibrary.Concat(uniqueGameIds).Distinct().ToArray();
+        
         await db.SaveChangesAsync();
         return purchase;
     }
@@ -114,7 +115,11 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
         if (purchase is null) {
             return false;
         }
-
+        
+        var formerUser = await db.Users.FirstOrDefaultAsync(x => x.Id == purchase.UserId);
+        
+        var currentLibrary = formerUser.Library;
+        formerUser.Library = currentLibrary.Where(gameId => !purchase.GameIds.Contains(gameId)).ToArray();
         db.Purchases.Remove(purchase);
         await db.SaveChangesAsync();
         return true;

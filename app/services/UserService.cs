@@ -1,6 +1,7 @@
 using game_platform.net.database;
 using game_platform.net.dto.request;
 using game_platform.net.interfaces;
+using game_platform.net.model;
 using Microsoft.EntityFrameworkCore;
 
 namespace game_platform.net.services;
@@ -29,6 +30,7 @@ public class UserService(PlatformDbContext db) : IUserService {
             Id = id,
             ProfileName = request.ProfileName.Trim(),
             Email = request.Email.Trim(),
+            Library = []
         };
 
         db.Users.Add(entity);

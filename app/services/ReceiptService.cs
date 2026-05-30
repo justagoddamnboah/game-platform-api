@@ -1,4 +1,5 @@
 using System.Text;
+using game_platform.net.dto.response;
 using game_platform.net.interfaces;
 using game_platform.net.model;
 
@@ -13,12 +14,12 @@ public class ReceiptService : IReceiptService {
         builder.AppendLine($"Покупка: {purchase.Id}");
         builder.AppendLine($"Дата (UTC): {purchase.CreatedAtUtc:yyyy-MM-dd HH:mm:ss}");
         builder.AppendLine("Клиент:");
-        builder.AppendLine($"- {purchase.UserName} ({purchase.UserId})");
+        builder.AppendLine($"- ({purchase.UserId})");
         builder.AppendLine(new string('-', 40));
         builder.AppendLine("Игры (id):");
         for (int i = 0; i < purchase.GameIds.Length; i++) {
             builder.AppendLine(
-                $"{purchase.GameIds[i]} - {purchase.GameNames[i]}"
+                $"{purchase.GameIds[i]}"
             );
         }
 

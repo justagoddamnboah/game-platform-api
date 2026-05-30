@@ -7,7 +7,8 @@ public class Mapper : IMapper {
     public UserResponse Map(User user) => new() {
         Id = user.Id,
         ProfileName = user.ProfileName,
-        Email = user.Email
+        Email = user.Email,
+        GamesCount = user.Library.Length
     };
     
     public GameResponse Map(Game game) => new() {
@@ -19,9 +20,7 @@ public class Mapper : IMapper {
     public PurchaseResponse Map(Purchase purchase) => new() {
         Id = purchase.Id,
         UserId = purchase.UserId,
-        UserName = purchase.UserName,
         GameIds = purchase.GameIds,
-        GameNames = purchase.GameNames,
         Total = purchase.Total,
         CreatedAtUtc = purchase.CreatedAtUtc
     };

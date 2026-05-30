@@ -5,14 +5,11 @@ using game_platform.net.interfaces;
 
 namespace game_platform.net.api;
 
-
 public static class PurchasesEndpoints {
-    public static RouteGroupBuilder MapPurchasesEndpoints(this RouteGroupBuilder api)
-    {
+    public static RouteGroupBuilder MapPurchasesEndpoints(this RouteGroupBuilder api) {
         var group = api.MapGroup("/purchases").WithTags("Purchases");
 
-        group.MapGet("/", async (IPurchaseService purchases, IMapper mapper) =>
-            {
+        group.MapGet("/", async (IPurchaseService purchases, IMapper mapper) => {
                 var result = await purchases.GetAllAsync();
                 return Results.Ok(result.Select(mapper.Map));
             })
