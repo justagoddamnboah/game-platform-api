@@ -6,5 +6,4 @@ public class Game {
     public decimal Price { get; set; }
     public int AgeRestriction { get; set; }
     public Guid[] Reviews { get; set; } = new Guid[] { };
-    public float? Rating { get; set; }
 }

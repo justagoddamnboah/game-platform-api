@@ -22,11 +22,9 @@ public class ReceiptService : IReceiptService {
                 $"{purchase.GameIds[i]}"
             );
         }
-
         builder.AppendLine(new string('-', 40));
         builder.AppendLine($"ИТОГО: {purchase.Total:F2} RUB");
         builder.AppendLine("Спасибо за покупку!");
-
         return new ReceiptFile {
             FileName = $"receipt-{purchase.Id}.txt",
             ContentType = "text/plain; charset=utf-8",

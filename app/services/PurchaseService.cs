@@ -13,11 +13,13 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
             .OrderByDescending(x => x.CreatedAtUtc)
             .ToListAsync();
 
+    
     public async Task<Purchase?> GetByIdAsync(Guid id)
         => await db.Purchases
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
 
+    
     public async Task<Purchase> CreateAsync(CreatePurchaseRequest request) {
         if (request.GameIds.Count == 0) {
             throw new ArgumentException("Список игр в покупке не должен быть пустым.");
@@ -64,6 +66,7 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
         return purchase;
     }
 
+    
     public async Task<Purchase?> UpdateAsync(Guid id, CreatePurchaseRequest request) {
         if (request.GameIds.Count == 0) {
             throw new ArgumentException("Список игр в покупке не должен быть пустым.");
@@ -104,6 +107,7 @@ public class PurchaseService(PlatformDbContext db) : IPurchaseService {
         return purchase;
     }
 
+    
     public async Task<bool> DeleteAsync(Guid id) {
         var purchase = await db.Purchases.FirstOrDefaultAsync(x => x.Id == id);
         if (purchase is null) {

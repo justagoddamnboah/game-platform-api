@@ -23,7 +23,6 @@ public static class PurchasesEndpoints {
                 if (purchase is null) {
                     return Results.NotFound(new ErrorResponse { Message = "Покупка не найдена." });
                 }
-
                 var receipt = receipts.BuildReceipt(purchase);
                 return Results.File(receipt.Content, receipt.ContentType, receipt.FileName);
             })
@@ -87,7 +86,7 @@ public static class PurchasesEndpoints {
             .WithDescription("Возвращает товары на склад и списывает начисленные за покупку бонусы.")
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
-
+        
         return api;
     }
 }

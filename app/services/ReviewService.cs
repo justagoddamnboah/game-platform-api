@@ -12,11 +12,13 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
             .AsNoTracking()
             .ToListAsync();
 
+    
     public async Task<Review?> GetByIdAsync(Guid id)
         => await db.Reviews
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
 
+    
     public async Task<Review> AddAsync(CreateReviewRequest request) {
         ValidateProductFields(request.Rating);
 
@@ -47,6 +49,7 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
         return entity;
     }
 
+    
     public async Task<Review?> UpdateAsync(Guid id, UpdateReviewRequest request) {
         ValidateProductFields(request.Rating);
         var entity = await db.Reviews.FirstOrDefaultAsync(x => x.Id == id);
@@ -72,6 +75,7 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
         return entity;
     }
 
+    
     public async Task<bool> DeleteAsync(Guid id) {
         var entity = await db.Reviews.FirstOrDefaultAsync(x => x.Id == id);
         var game = await db.Games.FirstOrDefaultAsync(x => x.Id == entity.GameId);
@@ -86,6 +90,7 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
         return true;
     }
 
+    
     private static void ValidateProductFields(int rating) {
         if (rating < 0) {
             throw new ArgumentException("Оценка не может быть отрицательной.");

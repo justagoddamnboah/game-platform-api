@@ -13,11 +13,13 @@ public class UserService(PlatformDbContext db) : IUserService {
             .OrderBy(x => x.ProfileName)
             .ToListAsync();
 
+    
     public async Task<User?> GetByIdAsync(Guid id)
         => await db.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
 
+    
     public async Task<IReadOnlyList<Game>> SeeLibrary(Guid userId) {
         var user = await db.Users
             .AsNoTracking()
@@ -28,6 +30,7 @@ public class UserService(PlatformDbContext db) : IUserService {
             .ToListAsync();
         return games;
     }
+    
     
     public async Task<IReadOnlyList<Review>> SeeUsersReviews(Guid userId) {
         var user = await db.Users
@@ -40,6 +43,7 @@ public class UserService(PlatformDbContext db) : IUserService {
         return reviews;
     }
 
+    
     public async Task<User> AddAsync(CreateUserRequest request) {
         ValidateUserFields(request.ProfileName, request.Email, request.Age);
         var id = request.Id ?? Guid.NewGuid();
@@ -59,6 +63,7 @@ public class UserService(PlatformDbContext db) : IUserService {
         return entity;
     }
 
+    
     public async Task<User?> UpdateAsync(Guid id, UpdateUserRequest request) {
         ValidateUserFields(request.ProfileName, request.Email, request.Age);
         var entity = await db.Users.FirstOrDefaultAsync(x => x.Id == id);
@@ -72,6 +77,7 @@ public class UserService(PlatformDbContext db) : IUserService {
         return entity;
     }
 
+    
     public async Task<bool> DeleteAsync(Guid id) {
         var entity = await db.Users.FirstOrDefaultAsync(x => x.Id == id);
         if (entity is null) {
@@ -86,6 +92,7 @@ public class UserService(PlatformDbContext db) : IUserService {
         return true;
     }
 
+    
     private static void ValidateUserFields(string profileName, string email, int age) {
         if (string.IsNullOrWhiteSpace(profileName)) {
             throw new ArgumentException("Имя пользователя не должно быть пустым.");

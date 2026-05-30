@@ -90,7 +90,7 @@ public static class GamesEndpoints {
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
-
+        
         return api;
     }
 }

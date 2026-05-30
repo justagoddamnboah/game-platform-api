@@ -13,10 +13,12 @@ public class GameService(PlatformDbContext db) : IGameService {
             .OrderBy(x => x.Name)
             .ToListAsync();
 
+    
     public async Task<Game?> GetByIdAsync(Guid id)
         => await db.Games
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
+    
     
     public async Task<IReadOnlyList<Review>> SeeGameReviews(Guid gameId) {
         var game = await db.Games
@@ -29,6 +31,7 @@ public class GameService(PlatformDbContext db) : IGameService {
         return reviews;
     }
 
+    
     public async Task<Game> AddAsync(CreateGameRequest request) {
         ValidateProductFields(request.Name, request.Price, request.AgeRestriction);
         var id = request.Id ?? Guid.NewGuid();
@@ -47,6 +50,7 @@ public class GameService(PlatformDbContext db) : IGameService {
         return entity;
     }
 
+    
     public async Task<Game?> UpdateAsync(Guid id, UpdateGameRequest request) {
         ValidateProductFields(request.Name, request.Price, request.AgeRestriction);
         var entity = await db.Games.FirstOrDefaultAsync(x => x.Id == id);
@@ -60,6 +64,7 @@ public class GameService(PlatformDbContext db) : IGameService {
         return entity;
     }
 
+    
     public async Task<bool> DeleteAsync(Guid id) {
         var entity = await db.Games.FirstOrDefaultAsync(x => x.Id == id);
         if (entity is null) {
@@ -70,6 +75,7 @@ public class GameService(PlatformDbContext db) : IGameService {
         return true;
     }
 
+    
     private static void ValidateProductFields(string name, decimal price, int ageRestriction) {
         if (string.IsNullOrWhiteSpace(name)) {
             throw new ArgumentException("Название игры не должно быть пустым.");

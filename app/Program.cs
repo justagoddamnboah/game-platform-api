@@ -5,9 +5,7 @@ using game_platform.net.interfaces;
 using game_platform.net.services;
 using Microsoft.EntityFrameworkCore;
 
-
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => {
     options.SwaggerDoc("v1", new() {
@@ -17,13 +15,14 @@ builder.Services.AddSwaggerGen(options => {
     });
 });
 
+
 var connectionString = builder.Configuration.GetConnectionString("Postgres")
     ?? throw new InvalidOperationException("Не найдена строка подключения ConnectionStrings:Postgres.");
+
 
 builder.Services.AddDbContext<PlatformDbContext>(options => {
     options.UseNpgsql(connectionString);
 });
-
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
@@ -31,30 +30,27 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IReceiptService, ReceiptService>();
 builder.Services.AddScoped<IMapper, Mapper>();
 
-var app = builder.Build();
 
+var app = builder.Build();
 if (app.Environment.IsDevelopment()) {
     using (var scope = app.Services.CreateScope()) {
         var db = scope.ServiceProvider.GetRequiredService<PlatformDbContext>();
         await db.Database.EnsureCreatedAsync();
     }
-
     app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
+    app.UseSwaggerUI(options => {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "Game Platform API v1");
         options.RoutePrefix = "swagger";
     });
 }
+app.MapGet("/", () => Results.Ok(new {
+    message = "Game Platform API работает."
+}));
+
 
 var api = app.MapGroup("/api");
 api.MapUsersEndpoints();
 api.MapGamesEndpoints();
 api.MapPurchasesEndpoints();
 api.MapReviewsEndpoints();
-
-app.MapGet("/", () => Results.Ok(new {
-    message = "Game Platform API работает."
-}));
-
 await app.RunAsync();
