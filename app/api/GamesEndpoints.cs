@@ -28,6 +28,22 @@ public static class GamesEndpoints {
             .Produces<GameResponse>(StatusCodes.Status200OK)
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
 
+        group.MapGet("/{gameId:guid}/reviews",
+                async (Guid gameId, IGameService games, IMapper mapper) => {
+                    var game = await games.GetByIdAsync(gameId);
+                    if (game == null) {
+                        return Results.NotFound(new ErrorResponse { Message = "Игра не найдена." });
+                    }
+                    var reviews = await games.SeeGameReviews(gameId);
+                    var reviewResponses = reviews.Select(review => mapper.Map(review)).ToList();
+                    return reviews.Count == 0
+                        ? Results.NotFound(new ErrorResponse {Message = "Отзывов нет."})
+                        : Results.Ok(reviewResponses);
+                })
+            .WithSummary("Посмотреть все отзывы игры")
+            .Produces<ReviewResponse>(StatusCodes.Status200OK)
+            .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
+        
         group.MapPost("/", async (CreateGameRequest body, IGameService games, IMapper mapper) => {
                 try {
                     var created = await games.AddAsync(body);

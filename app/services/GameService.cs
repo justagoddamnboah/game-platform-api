@@ -17,6 +17,17 @@ public class GameService(PlatformDbContext db) : IGameService {
         => await db.Games
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
+    
+    public async Task<IReadOnlyList<Review>> SeeGameReviews(Guid gameId) {
+        var game = await db.Games
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == gameId);
+        var reviews = await db.Reviews
+            .AsNoTracking()
+            .Where(r => game.Reviews.Contains(r.Id))
+            .ToListAsync();
+        return reviews;
+    }
 
     public async Task<Game> AddAsync(CreateGameRequest request) {
         ValidateProductFields(request.Name, request.Price, request.AgeRestriction);
