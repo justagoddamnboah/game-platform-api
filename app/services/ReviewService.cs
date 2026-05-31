@@ -16,20 +16,20 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
     public async Task<Review?> GetByIdAsync(Guid id)
         => await db.Reviews
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(r => r.Id == id);
 
     
     public async Task<Review> AddAsync(CreateReviewRequest request) {
         ValidateProductFields(request.Rating);
         var id = request.Id ?? Guid.NewGuid();
-        if (await db.Games.AnyAsync(x => x.Id == id)) {
+        if (await db.Games.AnyAsync(r => r.Id == id)) {
             throw new InvalidOperationException($"Отзыв с идентификатором {id} уже существует.");
         }
-        var user = await db.Users.FirstOrDefaultAsync(x => x.Id == request.UserId);
+        var user = await db.Users.FirstOrDefaultAsync(r => r.Id == request.UserId);
         if (user is null) {
             throw new InvalidOperationException("Пользователь не найден.");
         }
-        var game = await db.Games.FirstOrDefaultAsync(x => x.Id == request.GameId);
+        var game = await db.Games.FirstOrDefaultAsync(r => r.Id == request.GameId);
         if (game is null) {
             throw new InvalidOperationException("Игра не найдена.");
         }
@@ -53,15 +53,15 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
     
     public async Task<Review?> UpdateAsync(Guid id, UpdateReviewRequest request) {
         ValidateProductFields(request.Rating);
-        var entity = await db.Reviews.FirstOrDefaultAsync(x => x.Id == id);
+        var entity = await db.Reviews.FirstOrDefaultAsync(r => r.Id == id);
         if (entity is null) {
             return null;
         }
-        var user = await db.Users.FirstOrDefaultAsync(x => x.Id == request.UserId);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == request.UserId);
         if (user is null) {
             throw new InvalidOperationException("Пользователь не найден.");
         }
-        var game = await db.Games.FirstOrDefaultAsync(x => x.Id == request.GameId);
+        var game = await db.Games.FirstOrDefaultAsync(g => g.Id == request.GameId);
         if (game is null) {
             throw new InvalidOperationException("Игра не найдена.");
         }
@@ -80,9 +80,9 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
 
     
     public async Task<bool> DeleteAsync(Guid id) {
-        var entity = await db.Reviews.FirstOrDefaultAsync(x => x.Id == id);
-        var game = await db.Games.FirstOrDefaultAsync(x => x.Id == entity.GameId);
-        var user = await db.Users.FirstOrDefaultAsync(x => x.Id == entity.UserId);
+        var entity = await db.Reviews.FirstOrDefaultAsync(r => r.Id == id);
+        var game = await db.Games.FirstOrDefaultAsync(g => g.Id == entity.GameId);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == entity.UserId);
         if (entity is null) {
             return false;
         }

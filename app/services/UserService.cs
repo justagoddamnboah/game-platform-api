@@ -10,20 +10,20 @@ public class UserService(PlatformDbContext db) : IUserService {
     public async Task<IReadOnlyList<User>> GetAllAsync()
         => await db.Users
             .AsNoTracking()
-            .OrderBy(x => x.ProfileName)
+            .OrderBy(u => u.ProfileName)
             .ToListAsync();
 
     
     public async Task<User?> GetByIdAsync(Guid id)
         => await db.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(u => u.Id == id);
 
     
     public async Task<IReadOnlyList<Game>> SeeLibrary(Guid userId) {
         var user = await db.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == userId);
+            .FirstOrDefaultAsync(u => u.Id == userId);
         var games = await db.Games
             .AsNoTracking()
             .Where(g => user.Library.Contains(g.Id))
@@ -35,7 +35,7 @@ public class UserService(PlatformDbContext db) : IUserService {
     public async Task<IReadOnlyList<Review>> SeeUsersReviews(Guid userId) {
         var user = await db.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == userId);
+            .FirstOrDefaultAsync(u => u.Id == userId);
         var reviews = await db.Reviews
             .AsNoTracking()
             .Where(r => user.Reviews.Contains(r.Id))
@@ -47,7 +47,7 @@ public class UserService(PlatformDbContext db) : IUserService {
     public async Task<User> AddAsync(CreateUserRequest request) {
         ValidateUserFields(request.ProfileName, request.Email, request.Age);
         var id = request.Id ?? Guid.NewGuid();
-        if (await db.Users.AnyAsync(x => x.Id == id)) {
+        if (await db.Users.AnyAsync(u => u.Id == id)) {
             throw new InvalidOperationException($"Пользователь с идентификатором {id} уже существует.");
         }
         var entity = new User {
@@ -66,7 +66,7 @@ public class UserService(PlatformDbContext db) : IUserService {
     
     public async Task<User?> UpdateAsync(Guid id, UpdateUserRequest request) {
         ValidateUserFields(request.ProfileName, request.Email, request.Age);
-        var entity = await db.Users.FirstOrDefaultAsync(x => x.Id == id);
+        var entity = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
         if (entity is null) {
             return null;
         }
@@ -79,7 +79,7 @@ public class UserService(PlatformDbContext db) : IUserService {
 
     
     public async Task<bool> DeleteAsync(Guid id) {
-        var entity = await db.Users.FirstOrDefaultAsync(x => x.Id == id);
+        var entity = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
         if (entity is null) {
             return false;
         }

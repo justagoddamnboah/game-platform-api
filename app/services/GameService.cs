@@ -10,20 +10,20 @@ public class GameService(PlatformDbContext db) : IGameService {
     public async Task<IReadOnlyList<Game>> GetAllAsync()
         => await db.Games
             .AsNoTracking()
-            .OrderBy(x => x.Name)
+            .OrderBy(g => g.Name)
             .ToListAsync();
 
     
     public async Task<Game?> GetByIdAsync(Guid id)
         => await db.Games
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(g => g.Id == id);
     
     
     public async Task<IReadOnlyList<Review>> SeeGameReviews(Guid gameId) {
         var game = await db.Games
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == gameId);
+            .FirstOrDefaultAsync(g => g.Id == gameId);
         var reviews = await db.Reviews
             .AsNoTracking()
             .Where(r => game.Reviews.Contains(r.Id))
@@ -35,7 +35,7 @@ public class GameService(PlatformDbContext db) : IGameService {
     public async Task<Game> AddAsync(CreateGameRequest request) {
         ValidateProductFields(request.Name, request.Price, request.AgeRestriction);
         var id = request.Id ?? Guid.NewGuid();
-        if (await db.Games.AnyAsync(x => x.Id == id)) {
+        if (await db.Games.AnyAsync(g => g.Id == id)) {
             throw new InvalidOperationException($"Игра с идентификатором {id} уже существует.");
         }
         var entity = new Game {
@@ -54,7 +54,7 @@ public class GameService(PlatformDbContext db) : IGameService {
     
     public async Task<Game?> UpdateAsync(Guid id, UpdateGameRequest request) {
         ValidateProductFields(request.Name, request.Price, request.AgeRestriction);
-        var entity = await db.Games.FirstOrDefaultAsync(x => x.Id == id);
+        var entity = await db.Games.FirstOrDefaultAsync(g => g.Id == id);
         if (entity is null) {
             return null;
         }
@@ -67,9 +67,17 @@ public class GameService(PlatformDbContext db) : IGameService {
 
     
     public async Task<bool> DeleteAsync(Guid id) {
-        var entity = await db.Games.FirstOrDefaultAsync(x => x.Id == id);
+        var entity = await db.Games.FirstOrDefaultAsync(g => g.Id == id);
         if (entity is null) {
             return false;
+        }
+        var usedInPurchase = await db.Purchases.AnyAsync(p => p.GameIds.Contains(id));
+        if (usedInPurchase) {
+            throw new InvalidOperationException("Нельзя удалить игру: она указана в одной или нескольких покупках.");
+        }
+        var hasReviews = await db.Reviews.AnyAsync(r => r.GameId == id);
+        if (hasReviews) {
+            throw new InvalidOperationException("Нельзя удалить игру: у нее есть отзывы.");
         }
         db.Games.Remove(entity);
         await db.SaveChangesAsync();
