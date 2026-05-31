@@ -21,7 +21,6 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
     
     public async Task<Review> AddAsync(CreateReviewRequest request) {
         ValidateProductFields(request.Rating);
-
         var id = request.Id ?? Guid.NewGuid();
         if (await db.Games.AnyAsync(x => x.Id == id)) {
             throw new InvalidOperationException($"Отзыв с идентификатором {id} уже существует.");
@@ -45,6 +44,8 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
         db.Reviews.Add(entity);
         game.Reviews = game.Reviews.Append(entity.Id).ToArray();
         user.Reviews = user.Reviews.Append(entity.Id).ToArray();
+        await db.SaveChangesAsync();
+        game.Rating = await CalculateRating(entity.GameId);
         await db.SaveChangesAsync();
         return entity;
     }
@@ -72,6 +73,8 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
         game.Reviews = game.Reviews.Append(entity.Id).ToArray();
         user.Reviews = user.Reviews.Append(entity.Id).ToArray();
         await db.SaveChangesAsync();
+        game.Rating = await CalculateRating(entity.GameId);
+        await db.SaveChangesAsync();
         return entity;
     }
 
@@ -87,13 +90,27 @@ public class ReviewService(PlatformDbContext db) : IReviewService {
         game.Reviews = game.Reviews.Where(reviewId => !entity.Id.Equals(reviewId)).ToArray();
         user.Reviews = user.Reviews.Where(reviewId => !entity.Id.Equals(reviewId)).ToArray();
         await db.SaveChangesAsync();
+        game.Rating = await CalculateRating(entity.GameId);
+        await db.SaveChangesAsync();
         return true;
     }
 
     
     private static void ValidateProductFields(int rating) {
-        if (rating < 0) {
-            throw new ArgumentException("Оценка не может быть отрицательной.");
+        if ((rating < 0) || (rating > 5)) {
+            throw new ArgumentException("Оценка должна быть от 0 до 5.");
         }
+    }
+
+    private async Task<float> CalculateRating(Guid gameId) {
+        var reviews = await db.Reviews.AsNoTracking().Where(r => r.GameId == gameId).ToListAsync();
+        float average = 0f;
+        foreach (var review in reviews) {
+            average += review.Rating;
+        }
+        if (reviews.Count == 0) {
+            return 0f;
+        }
+        return average / reviews.Count;
     }
 }

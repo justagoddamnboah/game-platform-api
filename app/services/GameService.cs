@@ -43,7 +43,8 @@ public class GameService(PlatformDbContext db) : IGameService {
             Name = request.Name.Trim(),
             Price = request.Price,
             AgeRestriction = request.AgeRestriction,
-            Reviews = []
+            Reviews = [],
+            Rating = 0f
         };
         db.Games.Add(entity);
         await db.SaveChangesAsync();

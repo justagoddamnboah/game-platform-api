@@ -5,4 +5,5 @@ public record GameResponse {
     public string Name { get; init; } = string.Empty;
 	public int AgeRestriction { get; init; }
     public decimal Price { get; init; }
+    public float Rating { get; init; }
 }

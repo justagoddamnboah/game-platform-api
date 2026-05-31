@@ -22,7 +22,8 @@ public class Mapper : IMapper {
         Id = game.Id,
         Name = game.Name,
         Price = game.Price,
-        AgeRestriction = game.AgeRestriction
+        AgeRestriction = game.AgeRestriction,
+        Rating = game.Rating
     };
 
     public ReviewResponse Map(Review review) => new() {
