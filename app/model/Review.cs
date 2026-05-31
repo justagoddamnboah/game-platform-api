@@ -5,6 +5,6 @@ public class Review {
     public Guid GameId { get; set; }
     public Guid UserId { get; set; }
     public int Rating { get; set; }
-    public string? Commentary { get; set; }
+    public string? Commentary { get; set; } = string.Empty;
     public DateTime CreatedAtUtc { get; set; }
 }

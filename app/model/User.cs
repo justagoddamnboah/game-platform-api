@@ -5,6 +5,6 @@ public class User {
     public string ProfileName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
 	public int Age { get; set; }
-    public Guid[] Library { get; set; } = new Guid[] { };
-    public Guid[] Reviews { get; set; } = new Guid[] { };
+    public Guid[] Library { get; set; } = [];
+    public Guid[] Reviews { get; set; } = [];
 }

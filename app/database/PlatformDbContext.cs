@@ -11,13 +11,17 @@ public class PlatformDbContext(DbContextOptions<PlatformDbContext> options) : Db
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         modelBuilder.Entity<User>(entity => {
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.ProfileName).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.Email).HasMaxLength(300).IsRequired();
+            entity.HasKey(u => u.Id);
+            entity.Property(u => u.ProfileName).HasMaxLength(200).IsRequired();
+            entity.Property(u => u.Email).HasMaxLength(300).IsRequired();
         });
         modelBuilder.Entity<Game>(entity => {
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            entity.HasKey(g => g.Id);
+            entity.Property(g => g.Name).HasMaxLength(200).IsRequired();
+        });
+        modelBuilder.Entity<Review>(entity => {
+            entity.HasKey(r => r.Id);
+            entity.Property(r => r.Commentary).HasMaxLength(1000).IsRequired();
         });
     }
 }

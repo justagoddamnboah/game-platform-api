@@ -5,6 +5,6 @@ public class Game {
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int AgeRestriction { get; set; }
-    public Guid[] Reviews { get; set; } = new Guid[] { };
+    public Guid[] Reviews { get; set; } = [];
     public float Rating { get; set; }
 }
