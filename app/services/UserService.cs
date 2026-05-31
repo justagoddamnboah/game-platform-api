@@ -87,6 +87,10 @@ public class UserService(PlatformDbContext db) : IUserService {
         if (hasPurchases) {
             throw new InvalidOperationException("Нельзя удалить пользователя: есть связанные покупки.");
         }
+        var hasReviews = await db.Reviews.AnyAsync(r => r.UserId == id);
+        if (hasReviews) {
+            throw new InvalidOperationException("Нельзя удалить пользователя: есть связанные отзывы.");
+        }
         db.Users.Remove(entity);
         await db.SaveChangesAsync();
         return true;
