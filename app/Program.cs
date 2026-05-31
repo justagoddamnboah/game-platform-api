@@ -35,7 +35,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment()) {
     using (var scope = app.Services.CreateScope()) {
         var db = scope.ServiceProvider.GetRequiredService<PlatformDbContext>();
-        await db.Database.EnsureCreatedAsync();
+        await db.Database.MigrateAsync();
+        //await db.Database.EnsureCreatedAsync();
     }
     app.UseSwagger();
     app.UseSwaggerUI(options => {
